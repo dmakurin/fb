@@ -183,7 +183,6 @@ static long calculate_buffsize(XSQLDA *sqlda)
 	return offset + sizeof(short);
 }
 
-#if (FB_API_VER >= 20)
 static VALUE fb_error_msg(const ISC_STATUS *isc_status)
 {
 	char msg[1024];
@@ -195,19 +194,6 @@ static VALUE fb_error_msg(const ISC_STATUS *isc_status)
 	}
 	return result;
 }
-#else
-static VALUE fb_error_msg(ISC_STATUS *isc_status)
-{
-	char msg[1024];
-	VALUE result = rb_str_new(NULL, 0);
-	while (isc_interprete(msg, &isc_status))
-	{
-		result = rb_str_cat(result, msg, strlen(msg));
-		result = rb_str_cat(result, "\n", strlen("\n"));
-	}
-	return result;
-}
-#endif
 
 struct time_object {
 	struct timeval tv;
