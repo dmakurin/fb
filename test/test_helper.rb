@@ -4,27 +4,9 @@ require 'fileutils'
 require 'securerandom'
 require 'bigdecimal'
 require 'fb'
+require 'minitest/autorun'
 
-if RUBY_VERSION =~ /^2/
-  require 'minitest/autorun'
-
-  unless Minitest.const_defined?('Test')
-    Minitest::Test = MiniTest::Unit::TestCase
-  end
-
-  class FbTestCase < Minitest::Test
-  end
-
-else
-  require 'test/unit'
-
-  class FbTestCase < Test::Unit::TestCase
-    def default_test
-    end
-  end
-end
-
-class FbTestCase
+class FbTestCase < MiniTest::Test
   include Fb
 
   def setup
