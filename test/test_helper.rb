@@ -30,8 +30,9 @@ class FbTestCase < MiniTest::Test
               else
                 File.join("/", "db", dbname)
               end
+    db_host = ENV.fetch('DB_HOST') { '0.0.0.0' }
     {
-      :database => "localhost:#{db_file}",
+      :database => "#{db_host}:#{db_file}",
       :username => "sysdba",
       :password => "masterkey",
       :charset => 'NONE',

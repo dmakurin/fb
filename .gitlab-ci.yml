@@ -1,7 +1,7 @@
 test:
   variables:
     TZ: "Europe/Moscow"
-    AR_HOST: RedDatabase
+    DB_HOST: RedDatabase
     RDB_VERSION: 3.0.8.0
   image: ruby:2.7
   services:
