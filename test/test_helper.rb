@@ -28,7 +28,7 @@ class FbTestCase < MiniTest::Test
               when /win32/
                 File.join("c:", "var", "fbdata", dbname)
               else
-                File.join("/", "tmp", "firebird", dbname)
+                File.join("/", "db", dbname)
               end
     {
       :database => "localhost:#{db_file}",
