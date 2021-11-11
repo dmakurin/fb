@@ -249,4 +249,50 @@ class CursorTest < FbTestCase
       end
     end
   end
+
+  def test_cursor_where_are_my_rows
+    skip
+    Database.create(@parms) do |connection|
+      # create tables
+      connection.query("CREATE TABLE MEMBERS (ID INT, USER_ID INT DEFAULT 0 NOT NULL, PROJECT_ID INT DEFAULT 0 NOT NULL)")
+      connection.query("CREATE TABLE MEMBER_ROLES (ID INT, MEMBER_ID INT DEFAULT 0 NOT NULL, ROLE_ID INT DEFAULT 0 NOT NULL)")
+      connection.query("CREATE TABLE ROLES (ID INT, BUILTIN INT DEFAULT 0 NOT NULL, NAME VARCHAR(255) DEFAULT '')")
+
+      # fill ROLES
+      connection.query("INSERT INTO ROLES (ID, BUILTIN, NAME) VALUES (?, ?, ?)", 1, 1, "Non member")
+      connection.query("INSERT INTO ROLES (ID, BUILTIN, NAME) VALUES (?, ?, ?)", 3, 0, "Member")
+
+      # fill MEMBERS
+      connection.query("INSERT INTO MEMBERS (ID, USER_ID, PROJECT_ID) VALUES (?, ?, ?)", 1, 1, 1)
+      connection.query("INSERT INTO MEMBERS (ID, USER_ID, PROJECT_ID) VALUES (?, ?, ?)", 3, 1, 3)
+      connection.query("INSERT INTO MEMBERS (ID, USER_ID, PROJECT_ID) VALUES (?, ?, ?)", 5, 1, 5)
+      connection.query("INSERT INTO MEMBERS (ID, USER_ID, PROJECT_ID) VALUES (?, ?, ?)", 7, 3, 1)
+      connection.query("INSERT INTO MEMBERS (ID, USER_ID, PROJECT_ID) VALUES (?, ?, ?)", 9, 3, 5)
+
+      # fill MEMBER_ROLES
+      connection.query("INSERT INTO MEMBER_ROLES (ID, MEMBER_ID, ROLE_ID) VALUES (?, ?, ?)", 1, 1, 3)
+      connection.query("INSERT INTO MEMBER_ROLES (ID, MEMBER_ID, ROLE_ID) VALUES (?, ?, ?)", 3, 3, 3)
+      connection.query("INSERT INTO MEMBER_ROLES (ID, MEMBER_ID, ROLE_ID) VALUES (?, ?, ?)", 5, 1, 3)
+      connection.query("INSERT INTO MEMBER_ROLES (ID, MEMBER_ID, ROLE_ID) VALUES (?, ?, ?)", 7, 3, 3)
+      connection.query("INSERT INTO MEMBER_ROLES (ID, MEMBER_ID, ROLE_ID) VALUES (?, ?, ?)", 9, 5, 3)
+      connection.query("INSERT INTO MEMBER_ROLES (ID, MEMBER_ID, ROLE_ID) VALUES (?, ?, ?)", 11, 7, 3)
+      connection.query("INSERT INTO MEMBER_ROLES (ID, MEMBER_ID, ROLE_ID) VALUES (?, ?, ?)", 13, 5, 1)
+      connection.query("INSERT INTO MEMBER_ROLES (ID, MEMBER_ID, ROLE_ID) VALUES (?, ?, ?)", 17, 9, 1)
+
+      100000.times do
+        connection.query(%q{SELECT "MEMBERS".* FROM "MEMBERS" WHERE "MEMBERS"."USER_ID" = ?
+            AND "MEMBERS"."PROJECT_ID" = ? ORDER BY "MEMBERS"."ID" ASC ROWS ?}, [1,3].sample, 1, 1)
+
+        member_id = [1,7].sample
+        sql = 'SELECT "ROLES".* FROM "ROLES" INNER JOIN "MEMBER_ROLES" ON "ROLES"."ID" = "MEMBER_ROLES"."ROLE_ID" WHERE "MEMBER_ROLES"."MEMBER_ID" = ?'
+        connection.execute(sql, member_id) do |cursor|
+          # must return entries from db
+          # not empty result set
+          refute_empty cursor.fetchall
+        end
+      end
+    ensure
+      connection.drop
+    end
+  end
 end
