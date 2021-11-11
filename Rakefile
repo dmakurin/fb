@@ -7,7 +7,10 @@ Rake::ExtensionTask.new "fb_ext" do |ext|
 end
 
 Rake::TestTask.new do |t|
-  t.test_files = FileList['test/**/*.rb'] - FileList['test/test_helper.rb']
+  t.test_files = FileList['test/**/*_test.rb']
+
+  t.warning = false
+  t.verbose = false
 end
 
 task :default => :test
