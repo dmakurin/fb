@@ -1,6 +1,6 @@
 require File.expand_path("../test_helper", __FILE__)
 
-class ConnectionTestCases < FbTestCase
+class ConnectionTest < FbTestCase
   def test_execute
     sql_schema = "CREATE TABLE TEST (ID INT, NAME VARCHAR(20))"
     sql_select = "SELECT * FROM RDB$DATABASE"

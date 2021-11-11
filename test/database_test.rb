@@ -1,6 +1,6 @@
 require File.expand_path("../test_helper", __FILE__)
 
-class DatabaseTestCases < FbTestCase
+class DatabaseTest < FbTestCase
   def setup
     super
     @parms = get_db_conn_params

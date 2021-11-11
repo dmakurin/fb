@@ -1,6 +1,6 @@
 require File.expand_path("../test_helper", __FILE__)
 
-class CursorTestCases < FbTestCase
+class CursorTest < FbTestCase
   def test_fetch_array
     Database.create(@parms) do |connection|
       connection.execute("select * from rdb$database") do |cursor|
