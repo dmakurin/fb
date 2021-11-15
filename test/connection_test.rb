@@ -210,19 +210,24 @@ class ConnectionTest < FbTestCase
 
   def test_drop_instance
     db = Database.create(@parms)
-    assert File.exist?(@db_file)
-    connection = db.connect
+    assert connection = db.connect
     assert connection.open?
     connection.drop
-    assert !connection.open?
-    assert !File.exist?(@db_file)
+    refute connection.open?
+    assert_raises Fb::Error, /no such file or directory/ do
+      Database.connect(@parms)
+    end
   end
 
   def test_drop_singleton
     Database.create(@parms) do |connection|
-      assert File.exist?(@db_file)
+      # db exists
+      assert connection.query('SELECT 1 FROM RDB$DATABASE')
       connection.drop
-      assert !File.exist?(@db_file)
+      # no db, raises error
+      assert_raises Fb::Error, /no such file or directory/ do
+        Database.connect(@parms)
+      end
     end
   end
 
