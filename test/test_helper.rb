@@ -4,34 +4,16 @@ require 'fileutils'
 require 'securerandom'
 require 'bigdecimal'
 require 'fb'
+require 'minitest/autorun'
 
-if RUBY_VERSION =~ /^2/
-  require 'minitest/autorun'
-
-  unless Minitest.const_defined?('Test')
-    Minitest::Test = MiniTest::Unit::TestCase
-  end
-
-  class FbTestCase < Minitest::Test
-  end
-
-else
-  require 'test/unit'
-
-  class FbTestCase < Test::Unit::TestCase
-    def default_test
-    end
-  end
-end
-
-class FbTestCase
+class FbTestCase < MiniTest::Test
   include Fb
 
   def setup
+    @db_host = ENV.fetch('DB_HOST') { '0.0.0.0' }
     @parms = get_db_conn_params("drivertest.fdb")
     @parms_s = get_db_conn_string(@parms)
     @db_file = @parms[:database].split(":", 2).last
-    @db_host = "localhost"
     @fb_version = get_fb_version
   end
 
@@ -46,10 +28,10 @@ class FbTestCase
               when /win32/
                 File.join("c:", "var", "fbdata", dbname)
               else
-                File.join("/", "tmp", "firebird", dbname)
+                File.join("/", "db", dbname)
               end
     {
-      :database => "localhost:#{db_file}",
+      :database => "#{@db_host}:#{db_file}",
       :username => "sysdba",
       :password => "masterkey",
       :charset => 'NONE',

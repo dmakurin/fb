@@ -905,6 +905,13 @@ error:
 	rb_raise(rb_eFbError, "%s", desc);
 }
 
+static char isc_tpb[] = {isc_tpb_version3,
+                        isc_tpb_write,
+                        isc_tpb_read_committed,
+                        isc_tpb_rec_version,
+                        isc_tpb_wait,
+                        isc_tpb_lock_timeout, 4, 10,0,0,0}; // 10 seconds
+
 static void fb_connection_transaction_start(struct FbConnection *fb_connection, VALUE opt)
 {
 	char *tpb = 0;
@@ -916,12 +923,11 @@ static void fb_connection_transaction_start(struct FbConnection *fb_connection, 
 
 	if (!NIL_P(opt)) {
 		tpb = trans_parseopts(opt, &tpb_len);
+		isc_start_transaction(fb_connection->isc_status, &fb_connection->transact, 1, &fb_connection->db, tpb_len, tpb);
 	} else {
-		tpb_len = 0;
-		tpb = NULL;
+		isc_start_transaction(fb_connection->isc_status, &fb_connection->transact, 1, &fb_connection->db, sizeof(isc_tpb), isc_tpb);
 	}
 
-	isc_start_transaction(fb_connection->isc_status, &fb_connection->transact, 1, &fb_connection->db, tpb_len, tpb);
 	xfree(tpb);
 	fb_error_check(fb_connection->isc_status);
 }

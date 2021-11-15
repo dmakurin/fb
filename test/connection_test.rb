@@ -1,6 +1,6 @@
 require File.expand_path("../test_helper", __FILE__)
 
-class ConnectionTestCases < FbTestCase
+class ConnectionTest < FbTestCase
   def test_execute
     sql_schema = "CREATE TABLE TEST (ID INT, NAME VARCHAR(20))"
     sql_select = "SELECT * FROM RDB$DATABASE"
@@ -18,43 +18,30 @@ class ConnectionTestCases < FbTestCase
   def test_query_select
     sql_select = "SELECT * FROM RDB$DATABASE"
     Database.create(@parms) do |connection|
-
       d = connection.query(sql_select)
       assert_instance_of Array, d
       assert_equal 1, d.size
       assert_instance_of Array, d.first
-      if @fb_version == 3
-        assert_equal 5, d.first.size
-      else
-        assert_equal 4, d.first.size
-      end
+      assert_equal 6, d.first.size
 
       a = connection.query(:array, sql_select)
       assert_instance_of Array, a
       assert_equal 1, a.size
       assert_instance_of Array, a.first
-      if @fb_version == 3
-        assert_equal 5, a.first.size
-      else
-        assert_equal 4, a.first.size
-      end
+      assert_equal 6, a.first.size
 
       h = connection.query(:hash, sql_select)
       assert_instance_of Array, h
       assert_equal 1, h.size
       assert_instance_of Hash, h.first
-      if @fb_version == 3
-        assert_equal 5, h.first.keys.size
-      else
-        assert_equal 4, h.first.keys.size
-      end
+      assert_equal 6, h.first.keys.size
+
       assert h.first.keys.include?("RDB$DESCRIPTION")
       assert h.first.keys.include?("RDB$RELATION_ID")
       assert h.first.keys.include?("RDB$SECURITY_CLASS")
       assert h.first.keys.include?("RDB$CHARACTER_SET_NAME")
-      if @fb_version == 3
-        assert h.first.keys.include?("RDB$LINGER")
-      end
+      assert h.first.keys.include?("RDB$LINGER")
+      assert h.first.keys.include?("RDB$SQL_SECURITY")
     end
   end
 
@@ -223,19 +210,24 @@ class ConnectionTestCases < FbTestCase
 
   def test_drop_instance
     db = Database.create(@parms)
-    assert File.exist?(@db_file)
-    connection = db.connect
+    assert connection = db.connect
     assert connection.open?
     connection.drop
-    assert !connection.open?
-    assert !File.exist?(@db_file)
+    refute connection.open?
+    assert_raises Fb::Error, /no such file or directory/ do
+      Database.connect(@parms)
+    end
   end
 
   def test_drop_singleton
     Database.create(@parms) do |connection|
-      assert File.exist?(@db_file)
+      # db exists
+      assert connection.query('SELECT 1 FROM RDB$DATABASE')
       connection.drop
-      assert !File.exist?(@db_file)
+      # no db, raises error
+      assert_raises Fb::Error, /no such file or directory/ do
+        Database.connect(@parms)
+      end
     end
   end
 
