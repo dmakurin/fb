@@ -10,10 +10,10 @@ class FbTestCase < MiniTest::Test
   include Fb
 
   def setup
+    @db_host = ENV.fetch('DB_HOST') { '0.0.0.0' }
     @parms = get_db_conn_params("drivertest.fdb")
     @parms_s = get_db_conn_string(@parms)
     @db_file = @parms[:database].split(":", 2).last
-    @db_host = "localhost"
     @fb_version = get_fb_version
   end
 
@@ -30,9 +30,8 @@ class FbTestCase < MiniTest::Test
               else
                 File.join("/", "db", dbname)
               end
-    db_host = ENV.fetch('DB_HOST') { '0.0.0.0' }
     {
-      :database => "#{db_host}:#{db_file}",
+      :database => "#{@db_host}:#{db_file}",
       :username => "sysdba",
       :password => "masterkey",
       :charset => 'NONE',

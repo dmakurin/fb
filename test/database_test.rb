@@ -61,7 +61,8 @@ class DatabaseTest < FbTestCase
   def test_create_instance
     db = Database.new(@parms)
     db.create
-    assert File.exist?(@db_file)
+    # if db not exist connection fails
+    assert db.connect
   end
 
   def test_create_instance_block
@@ -74,17 +75,17 @@ class DatabaseTest < FbTestCase
       assert_equal 3, connection.dialect
       assert_equal 3, connection.db_dialect
     end
-    assert File.exist?(@db_file)
+    assert db.connect
   end
 
   def test_create_singleton
-    Database.create(@parms);
-    assert File.exist?(@db_file)
+    db = Database.create(@parms);
+    assert db.connect
   end
 
   def test_create_singleton_with_defaults
-    Database.create(:database => @parms[:database]);
-    assert File.exist?(@db_file)
+    db = Database.create(:database => @parms[:database]);
+    assert db.connect
   end
 
   def test_create_singleton_block
@@ -95,7 +96,7 @@ class DatabaseTest < FbTestCase
       end
     end
     assert_instance_of Database, db
-    assert File.exist?(@db_file)
+    assert db.connect
   end
 
   def test_create_bad_param
@@ -125,19 +126,32 @@ class DatabaseTest < FbTestCase
   end
 
   def test_drop_instance
-    assert !File.exist?(@db_file)
     db = Database.create(@parms)
-    assert File.exist?(@db_file)
+    Database.connect(@parms) do |c|
+      assert c # connected to db
+    end
     db.drop
-    assert !File.exist?(@db_file)
+    assert_raises Fb::Error, /No such file or directory/ do
+      # no db
+      Database.connect(@parms)
+    end
   end
 
   def test_drop_singleton
-    assert !File.exist?(@db_file)
+    # no db
+    assert_raises Fb::Error, /No such file or directory/ do
+      Database.connect(@parms)
+    end
     Database.create(@parms)
-    assert File.exist?(@db_file)
+    # connected to db
+    Database.connect(@parms) do |c|
+      assert c
+    end
     Database.drop(@parms)
-    assert !File.exist?(@db_file)
+    # no db
+    assert_raises Fb::Error, /No such file or directory/ do
+      Database.connect(@parms)
+    end
   end
 
   def test_role_support
