@@ -392,6 +392,7 @@ static VALUE fb_sql_type_from_code(int code, int subtype)
 			break;
 #if (FB_API_VER >= 30)
 		case SQL_BOOLEAN:
+		case blr_bool:
 		case blr_boolean:
 			sql_type = "BOOLEAN";
 			break;
