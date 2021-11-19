@@ -2556,7 +2556,10 @@ static VALUE connection_columns(VALUE self, VALUE table_name)
     VALUE empty = rb_str_new(NULL, 0);
     VALUE columns = rb_ary_new();
     const char *sql = "SELECT r.rdb$field_name NAME, r.rdb$field_source, f.rdb$field_type, f.rdb$field_sub_type, "
-                "f.rdb$field_length, f.rdb$field_precision, f.rdb$field_scale SCALE, "
+                // get proper varchar length since UTF8 has 4 bytes per symbol
+                // f.rdb$character_set_id = 4 => UTF8
+                "iif(f.rdb$character_set_id = 4, f.rdb$character_length, f.rdb$field_length) LENGTH, "
+                "f.rdb$field_precision, f.rdb$field_scale SCALE, "
                 "COALESCE(r.rdb$default_source, f.rdb$default_source), "
                 "COALESCE(r.rdb$null_flag, f.rdb$null_flag) "
                 "FROM rdb$relation_fields r "
