@@ -6,3 +6,4 @@ Gemfile.lock
 *.log
 Makefile
 tags
+.idea
