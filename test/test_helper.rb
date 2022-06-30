@@ -60,6 +60,14 @@ class FbTestCase < MiniTest::Test
       version
     end
   end
+
+  def with_database
+    Database.create(@parms) do |connection|
+      yield connection
+    ensure
+      connection.drop
+    end
+  end
 end
 
 class Fb::Connection

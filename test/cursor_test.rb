@@ -251,8 +251,8 @@ class CursorTest < FbTestCase
   end
 
   def test_cursor_where_are_my_rows
-    skip
-    Database.create(@parms) do |connection|
+    skip 'fix me pls'
+    with_database do |connection|
       # create tables
       connection.query("CREATE TABLE MEMBERS (ID INT, USER_ID INT DEFAULT 0 NOT NULL, PROJECT_ID INT DEFAULT 0 NOT NULL)")
       connection.query("CREATE TABLE MEMBER_ROLES (ID INT, MEMBER_ID INT DEFAULT 0 NOT NULL, ROLE_ID INT DEFAULT 0 NOT NULL)")
@@ -293,6 +293,20 @@ class CursorTest < FbTestCase
       end
     ensure
       connection.drop
+    end
+  end
+
+  # If parameter value is null and column has not null flag driver raises error "specified column is not permitted to be null"
+  def test_select_from_not_null_column
+    skip 'fix me pls'
+    with_database do |connection|
+      connection.query('create table test (col1 varchar(10) not null, col2 varchar(10))')
+      # works
+      connection.execute('select * from test where col1 = NULL') { |cursor| assert_kind_of Fb::Cursor, cursor }
+      # column doesn't have a not_null flag, assertion works
+      connection.execute('select * from test where col2 = ?', nil) { |cursor| assert_kind_of Fb::Cursor, cursor }
+      # doesn't work
+      connection.execute('select * from test where col1 = ?', nil) { |cursor| assert_kind_of Fb::Cursor, cursor }
     end
   end
 end
