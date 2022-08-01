@@ -291,8 +291,6 @@ class CursorTest < FbTestCase
           refute_empty cursor.fetchall
         end
       end
-    ensure
-      connection.drop
     end
   end
 
