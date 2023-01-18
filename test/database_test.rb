@@ -195,14 +195,11 @@ class DatabaseTest < FbTestCase
   end
 
   def test_database_collation
-    params = {
-      :host => @db_host,
-      :database => '/db/collation.fdb',
-      :charset => 'UTF8',
-      :collation => 'UNICODE_CI_AI'
-    }
+    params = @parms.dup
+    params[:encoding] = 'utf-8'
+    params[:charset] = 'utf8'
+    params[:collation] = 'UNICODE_CI_AI'
 
-    Database.connect(params).drop rescue nil
     db = Database.create(params)
 
     assert_equal db.collation, params[:collation]
