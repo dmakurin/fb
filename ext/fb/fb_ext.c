@@ -110,6 +110,7 @@ struct FbConnection {
 	unsigned short db_dialect;
 	short downcase_names;
 	VALUE encoding;
+	VALUE collation;
 	int dropped;
 	ISC_STATUS isc_status[20];
 	/* struct FbConnection *next; */
@@ -2410,6 +2411,7 @@ static const char* CONNECTION_PARMS[] = {
 	"@role",
 	"@downcase_names",
 	"@encoding",
+	"@collation",
 	(char *)0
 };
 
@@ -2438,6 +2440,7 @@ static VALUE connection_create(isc_db_handle handle, VALUE db)
 	downcase_names = rb_iv_get(db, "@downcase_names");
 	fb_connection->downcase_names = RTEST(downcase_names);
 	fb_connection->encoding = rb_iv_get(db, "@encoding");
+	fb_connection->collation = rb_iv_get(db, "@collation");
 
 	for (i = 0; (parm = CONNECTION_PARMS[i]); i++) {
 		rb_iv_set(connection, parm, rb_iv_get(db, parm));
@@ -2767,6 +2770,7 @@ static void check_page_size(int page_size)
  * :role:: database role to connect using (default: nil)
  * :downcase_names:: Column names are reported in lowercase, unless they were originally mixed case (default: nil).
  * :page_size:: page size to use when creating a database (default: 4096)
+ * :collation:: collation to be used for a given charset (default: 'NONE')
  */
 static VALUE database_initialize(int argc, VALUE *argv, VALUE self)
 {
@@ -2789,6 +2793,7 @@ static VALUE database_initialize(int argc, VALUE *argv, VALUE self)
 		rb_iv_set(self, "@downcase_names", rb_hash_aref(parms, ID2SYM(rb_intern("downcase_names"))));
 		rb_iv_set(self, "@encoding", default_string(parms, "encoding", "ASCII-8BIT"));
 		rb_iv_set(self, "@page_size", default_int(parms, "page_size", 4096));
+		rb_iv_set(self, "@collation", default_string(parms, "collation", "NONE"));
 	}
 	return self;
 }
@@ -2814,12 +2819,13 @@ static VALUE database_create(VALUE self)
 	VALUE password = rb_iv_get(self, "@password");
 	VALUE page_size = rb_iv_get(self, "@page_size");
 	VALUE charset = rb_iv_get(self, "@charset");
+	VALUE collation = rb_iv_get(self, "@collation");
 
 	check_page_size(NUM2INT(page_size));
 
-	parms = rb_ary_new3(5, database, username, password, page_size, charset);
+	parms = rb_ary_new3(6, database, username, password, page_size, charset, collation);
 
-	fmt = rb_str_new2("CREATE DATABASE '%s' USER '%s' PASSWORD '%s' PAGE_SIZE = %d DEFAULT CHARACTER SET %s;");
+	fmt = rb_str_new2("CREATE DATABASE '%s' USER '%s' PASSWORD '%s' PAGE_SIZE = %d DEFAULT CHARACTER SET %s COLLATION %s;");
 	stmt = rb_funcall(fmt, rb_intern("%"), 1, parms);
 	sql = StringValuePtr(stmt);
 
@@ -2949,6 +2955,7 @@ void Init_fb_ext()
 	rb_define_attr(rb_cFbDatabase, "downcase_names", 1, 1);
 	rb_define_attr(rb_cFbDatabase, "encoding", 1, 1);
 	rb_define_attr(rb_cFbDatabase, "page_size", 1, 1);
+	rb_define_attr(rb_cFbDatabase, "collation", 1, 1);
     rb_define_method(rb_cFbDatabase, "create", database_create, 0);
 	rb_define_singleton_method(rb_cFbDatabase, "create", database_s_create, -1);
 	rb_define_method(rb_cFbDatabase, "connect", database_connect, 0);
@@ -2964,6 +2971,7 @@ void Init_fb_ext()
 	rb_define_attr(rb_cFbConnection, "role", 1, 1);
 	rb_define_attr(rb_cFbConnection, "downcase_names", 1, 1);
 	rb_define_attr(rb_cFbConnection, "encoding", 1, 1);
+	rb_define_attr(rb_cFbConnection, "collation", 1, 1);
 	rb_define_method(rb_cFbConnection, "to_s", connection_to_s, 0);
 	rb_define_method(rb_cFbConnection, "execute", connection_execute, -1);
 	rb_define_method(rb_cFbConnection, "query", connection_query, -1);
