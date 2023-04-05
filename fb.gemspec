@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'fb/version'
 
 Gem::Specification.new do |s|
-  s.name = "firebird"
+  s.name = "fb"
   s.version = Fb::VERSION
   s.date = "2019-06-08"
   s.summary = "Firebird database driver"
@@ -12,9 +12,9 @@ Gem::Specification.new do |s|
   s.licenses = ["MIT"]
   s.requirements = "Firebird client library fbclient.dll, libfbclient.so or Firebird.framework."
   s.require_paths = ["lib", "ext"]
-  s.author = "Popa Adrian Marius"
-  s.email = "mapopa@gmail.com"
-  s.homepage = "http://github.com/mariuz/fb"
+  s.author = "Brent Rowland"
+  s.email = "rowland@rowlandresearch.com"
+  s.homepage = "http://github.com/rowland/fb"
   # s.has_rdoc = true
   # s.extra_rdoc_files = ['README']
   # s.rdoc_options << '--title' << 'Fb -- Ruby Firebird Extension' << '--main' << 'README' << '-x' << 'test'
