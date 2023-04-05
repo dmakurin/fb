@@ -1,7 +1,5 @@
 # Fb - Ruby Firebird Extension Library
 
-[![Build Status](https://travis-ci.org/mariuz/fb.svg?branch=master)](https://travis-ci.org/mariuz/fb)
-
 This is a Ruby driver for the [Firebird](https://firebirdsql.org/) database.
 
 ## Sample usage
