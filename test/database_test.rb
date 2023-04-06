@@ -193,5 +193,16 @@ class DatabaseTest < FbTestCase
       end
     end
   end
+
+  def test_database_collation
+    params = @parms.dup
+    params[:encoding] = 'utf-8'
+    params[:charset] = 'utf8'
+    params[:collation] = 'UNICODE_CI_AI'
+
+    db = Database.create(params)
+
+    assert_equal db.collation, params[:collation]
+  end
 end
 

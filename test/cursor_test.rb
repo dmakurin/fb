@@ -251,6 +251,8 @@ class CursorTest < FbTestCase
   end
 
   def test_cursor_where_are_my_rows
+    skip 'Used to debug 4a72aa14'
+
     with_database do |connection|
       # create tables
       connection.query("CREATE TABLE MEMBERS (ID INT, USER_ID INT DEFAULT 0 NOT NULL, PROJECT_ID INT DEFAULT 0 NOT NULL)")

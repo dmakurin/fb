@@ -541,4 +541,33 @@ class ConnectionTest < FbTestCase
       end
     end
   end
+
+  def test_default_collation
+    params = @parms.dup
+    params[:encoding] = 'utf-8'
+    params[:charset] = 'utf8'
+    params[:collation] = 'UNICODE_CI_AI'
+
+    sql = <<-SQL
+SELECT d.RDB$COLLATION_NAME
+FROM RDB$RELATION_FIELDS a
+INNER JOIN RDB$FIELDS b
+   ON b.RDB$FIELD_NAME = a.RDB$FIELD_SOURCE
+INNER JOIN RDB$CHARACTER_SETS c
+   ON c.RDB$CHARACTER_SET_ID = b.RDB$CHARACTER_SET_ID
+INNER JOIN RDB$COLLATIONS d
+   ON d.RDB$COLLATION_ID = b.RDB$COLLATION_ID AND d.RDB$CHARACTER_SET_ID = b.RDB$CHARACTER_SET_ID
+WHERE RDB$RELATION_NAME = 'TEST'
+    SQL
+
+    Database.connect(params).drop rescue nil
+    Database.create(params) do |connection|
+      connection.query 'create table test (test varchar(10))'
+      res = connection.query sql
+      # test.test collation
+      assert_equal params[:collation], res.first.first.strip
+    ensure
+      connection.drop
+    end
+  end
 end

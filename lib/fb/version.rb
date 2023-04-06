@@ -1,3 +1,3 @@
 module Fb
-  VERSION = "22.09.0"
+  VERSION = "23.04.0"
 end
